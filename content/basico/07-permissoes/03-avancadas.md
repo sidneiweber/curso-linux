@@ -1,7 +1,7 @@
 +++
 title = "Permissões avançadas"
 weight = 3
-description = "SUID, SGID, sticky bit e ACLs."
+description = "SUID, SGID, sticky bit, ACLs e atributos (chattr)."
 +++
 
 Além de `rwx`, existem três permissões especiais:
@@ -58,3 +58,39 @@ setfacl -m u:joao:rw relatorio.txt   # joao pode ler e escrever
 getfacl relatorio.txt                # mostra as ACLs
 setfacl -x u:joao relatorio.txt      # remove a ACL
 ```
+
+## Atributos de arquivos: chattr e lsattr
+
+Os **atributos** valem nos sistemas de arquivos ext2/3/4 (e, em parte, em XFS e Btrfs) e
+ficam acima das permissões: **nem o root** consegue apagar um arquivo imutável sem antes
+remover o atributo.
+
+| Atributo | Efeito |
+|---|---|
+| `i` | **imutável**: não pode ser alterado, apagado, renomeado nem receber links |
+| `a` | **somente acréscimo** (*append*): só aceita gravação no final; ótimo para logs |
+| `A` | não atualiza a data de último acesso (*atime*) |
+| `d` | ignorado pelo backup com `dump` |
+| `c` | compactação automática (só em alguns sistemas de arquivos, como Btrfs) |
+| `S` | gravações síncronas, direto no disco |
+
+```bash
+sudo chattr +i /etc/resolv.conf    # torna imutável
+lsattr /etc/resolv.conf            # ----i---------e------- /etc/resolv.conf
+sudo rm /etc/resolv.conf           # rm: Operation not permitted
+sudo chattr -i /etc/resolv.conf    # remove o atributo
+
+sudo chattr +a /var/log/app.log    # só permite acrescentar
+sudo chattr =A arquivo.txt         # = define exatamente estes atributos
+lsattr -d /srv/equipe              # -d mostra o próprio diretório, não o conteúdo
+```
+
+{{% notice note %}}
+Os atributos `s` (apagamento seguro) e `u` (recuperação), citados em materiais antigos, **não
+são implementados** pelo ext4 atual. Para apagar um arquivo com segurança, use `shred -u arquivo`.
+{{% /notice %}}
+
+{{% notice tip %}}
+Se um arquivo "não apaga de jeito nenhum", mesmo como root, confira com `lsattr`.
+Atacantes às vezes usam `chattr +i` para proteger arquivos maliciosos.
+{{% /notice %}}

@@ -57,6 +57,33 @@ ext4 pode ser reduzido, mas **desmontado** e com cuidado (`lvreduce -r`). XFS **
 pode ser reduzido. Faça backup antes.
 {{% /notice %}}
 
+## Removendo um disco, desativando e apagando
+
+Para tirar um disco do VG, mova antes os dados dele para os outros PVs:
+
+```bash
+sudo pvmove /dev/sdc                   # migra os dados de /dev/sdc (com o sistema no ar)
+sudo vgreduce vg_dados /dev/sdc        # retira o disco do VG
+sudo pvremove /dev/sdc                 # apaga a marca de PV
+```
+
+Ativar e desativar volumes (por exemplo, antes de levar os discos para outra máquina):
+
+```bash
+sudo lvchange -an /dev/vg_dados/lv_bkp # desativa um LV (-ay ativa)
+sudo vgchange -an vg_dados             # desativa todos os LVs do VG
+sudo vgchange -ay vg_dados             # ativa de novo
+```
+
+Apagando tudo (os dados são perdidos):
+
+```bash
+sudo umount /var/www
+sudo lvremove /dev/vg_dados/lv_web
+sudo vgremove vg_dados
+sudo pvremove /dev/sdb /dev/sdc
+```
+
 ## Snapshots
 
 Um snapshot congela o estado de um LV naquele instante — ideal para fazer backup

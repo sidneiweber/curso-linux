@@ -98,6 +98,28 @@ tail -f arquivo          # últimas linhas, acompanhando em tempo real
 file foto.jpg            # identifica o tipo do arquivo
 ```
 
+## Coringas — vários arquivos de uma vez
+
+O shell expande os **coringas** antes de executar o comando:
+
+| Coringa | Significado | Exemplo | Casa com |
+|---|---|---|---|
+| `*` | qualquer sequência de caracteres (inclusive nenhum) | `*.txt` | `a.txt`, `notas.txt` |
+| `?` | exatamente **um** caractere | `?ertificado` | `certificado`, `Certificado` |
+| `[ ]` | um caractere da lista ou faixa | `foto[1-3].jpg` | `foto1.jpg`, `foto2.jpg`, `foto3.jpg` |
+| `{ }` | cada uma das alternativas | `parte_{a,b,c}` | `parte_a`, `parte_b`, `parte_c` |
+
+```bash
+ls *.conf               # todos os arquivos terminados em .conf
+rm relatorio_202?.pdf   # relatorio_2020.pdf ... relatorio_2029.pdf
+cp foto[1-3].jpg fotos/
+mkdir -p aula{1..5}     # cria aula1, aula2, ..., aula5
+```
+
+{{% notice tip %}}
+Antes de um `rm` com coringas, teste com `ls` (ou `echo`) para ver o que será apagado.
+{{% /notice %}}
+
 ## Exercício
 
 1. Crie a estrutura `~/curso/aula1/exercicios` com um único comando.
